@@ -1,0 +1,43 @@
+<idea-plugin>
+  <id>cn.joylau.plugins.translation</id>
+  <name>joylau-translation</name>
+  <version>1.0</version>
+  <vendor email="2587038142.liu@gmail" url="http://www.joylau.cn">JoyLau</vendor>
+
+  <description><![CDATA[
+      Plugin for translate English to Chinese.<br>
+      <li>1. Choose the word you want translate.</li>
+      <li>2. Press Ctrl + NUMPAD0.</li>
+      <li>3. Fork ECTranslation Change ApiKey and KeyFrom</li>
+
+    ]]></description>
+
+  <change-notes><![CDATA[
+      <li>Change ApiKey and KeyFrom for myself</li>
+      <li>Change KeyMap to Ctrl + NumPad 0</li>
+    ]]>
+  </change-notes>
+
+  <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
+  <idea-version since-build="141.0"/>
+
+  <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
+       on how to target different products -->
+  <!-- uncomment to enable plugin in all products
+  <depends>com.intellij.modules.lang</depends>
+  -->
+
+  <extensions defaultExtensionNs="com.intellij">
+    <!-- Add your extensions here -->
+  </extensions>
+
+  <actions>
+    <!-- Add your actions here -->
+    <action id="ECTranslation" class="cn.joylau.plugins.translation.ECTranslation" text="Translate">
+      <add-to-group group-id="EditMenu" anchor="first"/>
+      <add-to-group group-id="EditorPopupMenu" anchor="first"/>
+      <keyboard-shortcut keymap="$default" first-keystroke="ctrl NUMPAD0"/>
+    </action>
+  </actions>
+
+</idea-plugin>
