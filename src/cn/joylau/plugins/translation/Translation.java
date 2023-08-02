@@ -13,11 +13,6 @@ public class Translation {
     private final static String EXPLAINS = "explains";
 
     private final static int SUCCESS = 0;
-    private final static int QUERY_STRING_TOO_LONG = 20;
-    private final static int CAN_NOT_TRANSLATE = 30;
-    private final static int INVALID_LANGUAGE = 40;
-    private final static int INVALID_KEY = 50;
-    private final static int NO_RESULT = 60;
 
     private String[] translation;
     private String query;
@@ -69,18 +64,8 @@ public class Translation {
         switch (errorCode) {
             case SUCCESS:
                 return "成功";
-            case QUERY_STRING_TOO_LONG:
-                return "要翻译的文本过长";
-            case CAN_NOT_TRANSLATE:
-                return "无法进行有效的翻译";
-            case INVALID_LANGUAGE:
-                return "不支持的语言类型";
-            case INVALID_KEY:
-                return "无效的key";
-            case NO_RESULT:
-                return "无词典结果";
         }
-        return "这是什么鬼";
+        return "参考错误代码列表: https://ai.youdao.com/DOCSIRMA/html/trans/api/wbfy/index.html#section-9";
     }
 
     private String getPhonetic() {
@@ -90,8 +75,8 @@ public class Translation {
         String phonetic = null;
         String us_phonetic = (String) basic.get(US_PHONETIC);
         String uk_phonetic = (String) basic.get(UK_PHONETIC);
-        if (us_phonetic == null && uk_phonetic == null) {
-            phonetic = "拼音：[" + (String) basic.get(PHONETIC) + "];";
+        if (us_phonetic == null && uk_phonetic == null && basic.get(PHONETIC) != null) {
+            phonetic = "拼音：[" + basic.get(PHONETIC) + "];";
         } else {
             if (us_phonetic != null) {
                 phonetic = "美式：[" + us_phonetic + "];";

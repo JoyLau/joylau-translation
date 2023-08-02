@@ -10,6 +10,7 @@ import com.intellij.openapi.editor.SelectionModel;
 import com.intellij.openapi.util.TextRange;
 import org.apache.http.util.TextUtils;
 
+import java.nio.charset.StandardCharsets;
 /**
  * Created by sky on 16/5/17.
  */

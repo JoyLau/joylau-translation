@@ -19,27 +19,17 @@ import java.awt.*;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.security.NoSuchAlgorithmException;
+import java.util.UUID;
 
 /**
  * Created by sky on 16/5/18.
  */
 public class RequestRunnable implements Runnable {
-    private static final String HOST = "fanyi.youdao.com";
-    private static final String PATH = "/openapi.do";
-    private static final String PARAM_KEY_FROM = "keyfrom";
-    private static final String PARAM_KEY = "key";
-    private static final String PARAM_TYPE = "type";
-    private static final String TYPE = "data";
-    private static final String PARAM_DOC_TYPE = "doctype";
-    private static final String DOC_TYPE = "json";
-    private static final String PARAM_CALL_BACK = "callback";
-    private static final String CALL_BACK = "show";
-    private static final String PARAM_VERSION = "version";
-    private static final String VERSION = "1.1";
-    private static final String PARAM_QUERY = "q";
-    //replace your own key, see http://fanyi.youdao.com/openapi?path=data-mode
-    private static final String KEY_FROM = "joylau";
-    private static final String KEY = "1154054836";
+    private static final String HOST = "openapi.youdao.com";
+    private static final String PATH = "/api";
+    private static final String APP_KEY = "01491290b069140b";
+    private static final String APP_SECRET = "Tvh5WadpVrUbdyBReAGjszu9X961yU8G";
     private Editor mEditor;
     private String mQuery;
 
@@ -51,16 +41,22 @@ public class RequestRunnable implements Runnable {
     public void run() {
         try {
             URI uri = createTranslationURI(mQuery);
-            RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(5000).setConnectTimeout(5000)
-                    .setConnectionRequestTimeout(5000).build();
+            RequestConfig requestConfig = RequestConfig.custom()
+                    .setSocketTimeout(5000)
+                    .setConnectTimeout(5000)
+                    .setConnectionRequestTimeout(5000)
+                    .build();
             HttpGet httpGet = new HttpGet(uri);
+            System.out.println(uri.toString());
             httpGet.setConfig(requestConfig);
+            httpGet.setHeader("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
             HttpClient client = HttpClients.createDefault();
             HttpResponse response = client.execute(httpGet);
             int status = response.getStatusLine().getStatusCode();
             if (status >= 200 && status < 300) {
                 HttpEntity resEntity = response.getEntity();
                 String json = EntityUtils.toString(resEntity, "UTF-8");
+                System.out.println(json);
                 Gson gson = new Gson();
                 Translation translation = gson.fromJson(json, Translation.class);
                 //show result
@@ -71,36 +67,39 @@ public class RequestRunnable implements Runnable {
             }
         } catch (IOException e) {
             showPopupBalloon(e.getMessage());
-        } catch (URISyntaxException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     private void showPopupBalloon(final String result) {
-        ApplicationManager.getApplication().invokeLater(new Runnable() {
-            public void run() {
-                JBPopupFactory factory = JBPopupFactory.getInstance();
-                factory.createHtmlTextBalloonBuilder(result, null, new JBColor(new Color(186, 238, 186), new Color(73, 117, 73)), null)
-                        .setFadeoutTime(5000)
-                        .createBalloon()
-                        .show(factory.guessBestPopupLocation(mEditor) , Balloon.Position.below);
-            }
+        ApplicationManager.getApplication().invokeLater(() -> {
+            JBPopupFactory factory = JBPopupFactory.getInstance();
+            factory.createHtmlTextBalloonBuilder(result, null, new JBColor(new Color(186, 238, 186), new Color(73, 117, 73)), null)
+                    .setFadeoutTime(5000)
+                    .createBalloon()
+                    .show(factory.guessBestPopupLocation(mEditor) , Balloon.Position.below);
         });
     }
 
 
-    private URI createTranslationURI(String query) throws URISyntaxException {
+    private URI createTranslationURI(String query) throws URISyntaxException, NoSuchAlgorithmException {
+        String salt = UUID.randomUUID().toString();
+        String curtime = String.valueOf(System.currentTimeMillis() / 1000);
+        String sign = AuthV3Util.calculateSign(APP_KEY, APP_SECRET, query, salt, curtime);
+
         URIBuilder builder = new URIBuilder();
-        builder.setScheme("http")
+        builder.setScheme("https")
                 .setHost(HOST)
                 .setPath(PATH)
-                .addParameter(PARAM_KEY_FROM, KEY_FROM)
-                .addParameter(PARAM_KEY, KEY)
-                .addParameter(PARAM_TYPE, TYPE)
-                .addParameter(PARAM_VERSION, VERSION)
-                .addParameter(PARAM_DOC_TYPE, DOC_TYPE)
-                .addParameter(PARAM_CALL_BACK, CALL_BACK)
-                .addParameter(PARAM_QUERY, query);
+                .addParameter("q", query)
+                .addParameter("from", "auto")
+                .addParameter("to", "auto")
+                .addParameter("appKey", APP_KEY)
+                .addParameter("salt", salt)
+                .addParameter("curtime", curtime)
+                .addParameter("signType", "v3")
+                .addParameter("sign", sign);
         return builder.build();
     }
 }
